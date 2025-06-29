@@ -161,10 +161,6 @@ function shuffleArray(array) {
 
 // ==== Auto-limit textarea ====
 
-const maxBaseLength = 100;
-const maxLimit = 500;
-const step = 50;
-
 messageInput.addEventListener("input", () => {
   const length = messageInput.value.length;
   const newLimit = Math.min(maxBaseLength + Math.floor(length / step) * step, maxLimit);
@@ -176,6 +172,15 @@ messageInput.addEventListener("input", () => {
   messageInput.setAttribute("maxlength", newLimit);
 });
 
-// ==== Initialize ====
+// ==== Show/Hide post form ====
+
+const formToggle = document.getElementById("formToggle");
+
+formToggle.addEventListener("click", () => {
+  const isVisible = postForm.style.display === "flex";
+  postForm.style.display = isVisible ? "none" : "flex";
+});
+
+// ==== Load posts on start ====
 
 window.onload = loadPosts;
