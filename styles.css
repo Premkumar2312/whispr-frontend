@@ -24,6 +24,20 @@ h1 {
   color: #ccc;
 }
 
+.plus-btn {
+  font-size: 2rem;
+  color: #ff6b6b;
+  text-align: center;
+  cursor: pointer;
+  margin-bottom: 10px;
+  user-select: none;
+  transition: 0.2s;
+}
+
+.plus-btn:hover {
+  transform: scale(1.2);
+}
+
 form {
   display: flex;
   flex-direction: column;
