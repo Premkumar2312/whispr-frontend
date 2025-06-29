@@ -7,34 +7,40 @@
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <!-- Username Setup Overlay -->
-  <div id="usernameOverlay" class="overlay">
-    <div class="username-box">
-      <h2>Choose a username</h2>
-      <input type="text" id="usernameInput" maxlength="20" placeholder="Enter a cool name" />
-      <button onclick="saveUsername()">Start Posting</button>
-    </div>
-  </div>
 
-  <!-- Top Emoji Filter Bar -->
+  <!-- Vertical Emoji Filter Bar -->
   <div id="filterBar">
+    <div class="filter-title">Top by:</div>
     <span onclick="filterBy('fire')">🔥</span>
     <span onclick="filterBy('skull')">💀</span>
     <span onclick="filterBy('bulb')">💡</span>
   </div>
 
+  <!-- Main Container -->
   <div class="container">
     <h1>Whispr</h1>
     <p class="tagline">Speak freely. Stay anonymous.</p>
 
+    <!-- Toggle Post Form Button -->
     <div id="formToggle" class="plus-btn">+</div>
 
+    <!-- Post Form -->
     <form id="postForm" style="display: none;">
       <textarea id="message" placeholder="Type your whisper..." required></textarea>
       <button type="submit">Post</button>
     </form>
 
+    <!-- Posts Display -->
     <div id="postsContainer"></div>
+  </div>
+
+  <!-- Username Overlay -->
+  <div id="usernameOverlay" class="overlay">
+    <div class="username-box">
+      <h2>Choose a username</h2>
+      <input type="text" id="usernameInput" maxlength="20" placeholder="Enter a cool name"/>
+      <button onclick="saveUsername()">Start Posting</button>
+    </div>
   </div>
 
   <script src="script.js"></script>
