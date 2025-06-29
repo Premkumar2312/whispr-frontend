@@ -1,179 +1,133 @@
-/* Global */
-body {
-  font-family: 'Segoe UI', sans-serif;
-  background-color: #111;
-  color: #eee;
-  margin: 0;
-  padding: 0;
+const API_URL = "https://your-backend-url.com"; // Replace with your backend
+
+const postForm = document.getElementById("postForm");
+const messageInput = document.getElementById("message");
+const postsContainer = document.getElementById("postsContainer");
+const formToggle = document.getElementById("formToggle");
+const yourPostsList = document.getElementById("yourPostsList");
+
+let allPosts = [];
+let yourPostIds = JSON.parse(localStorage.getItem("yourPostIds")) || [];
+
+formToggle.addEventListener("click", () => {
+  postForm.style.display = postForm.style.display === "none" ? "flex" : "none";
+});
+
+postForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const text = messageInput.value.trim();
+  if (!text) return;
+
+  const res = await fetch(`${API_URL}/posts`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ text }),
+  });
+
+  const data = await res.json();
+  yourPostIds.unshift(data._id);
+  localStorage.setItem("yourPostIds", JSON.stringify(yourPostIds));
+
+  messageInput.value = "";
+  await loadPosts();
+});
+
+async function loadPosts() {
+  const res = await fetch(`${API_URL}/posts`);
+  allPosts = await res.json();
+  renderPosts(allPosts);
+  renderYourPosts();
 }
 
-.container {
-  max-width: 600px;
-  margin: auto;
-  padding: 20px;
-  padding-left: 80px;
+function renderPosts(posts) {
+  postsContainer.innerHTML = "";
+
+  posts.forEach((post) => {
+    const postDiv = document.createElement("div");
+    postDiv.className = "post";
+
+    const text = document.createElement("p");
+    text.textContent = post.text;
+
+    const reactionDiv = document.createElement("div");
+    reactionDiv.className = "reactions";
+
+    ["fire", "skull", "bulb"].forEach((type) => {
+      const span = document.createElement("span");
+      span.innerHTML = `${getEmoji(type)} ${post.reactions[type]}`;
+
+      span.addEventListener("click", async () => {
+        const votedKey = `voted_${post._id}_${type}`;
+        if (localStorage.getItem(votedKey)) {
+          alert("You already reacted with this emoji!");
+          return;
+        }
+
+        await fetch(`${API_URL}/posts/${post._id}/react`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ type }),
+        });
+
+        localStorage.setItem(votedKey, true);
+        await loadPosts();
+      });
+
+      reactionDiv.appendChild(span);
+    });
+
+    postDiv.appendChild(text);
+    postDiv.appendChild(reactionDiv);
+    postsContainer.appendChild(postDiv);
+  });
 }
 
-h1 {
-  text-align: center;
-  color: #ff6b6b;
+function renderYourPosts() {
+  yourPostsList.innerHTML = "";
+
+  const yourPosts = allPosts.filter(post => yourPostIds.includes(post._id));
+  yourPosts.forEach((post) => {
+    const div = document.createElement("div");
+    div.className = "your-post";
+    div.textContent = post.text;
+
+    const emojiCounts = Object.entries(post.reactions)
+      .map(([key, value]) => `${getEmoji(key)} ${value}`)
+      .join("  ");
+
+    const meta = document.createElement("small");
+    meta.textContent = emojiCounts;
+    div.appendChild(meta);
+
+    yourPostsList.appendChild(div);
+  });
 }
 
-.tagline {
-  text-align: center;
-  font-size: 0.9rem;
-  margin-bottom: 20px;
-  color: #ccc;
+function filterBy(type) {
+  const sorted = [...allPosts].sort((a, b) => b.reactions[type] - a.reactions[type]);
+  renderPosts(sorted);
 }
 
-form {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-top: 15px;
+function getEmoji(type) {
+  return {
+    fire: "🔥",
+    skull: "💀",
+    bulb: "💡",
+  }[type];
 }
 
-textarea {
-  resize: none;
-  padding: 10px;
-  font-size: 1rem;
-  border: none;
-  border-radius: 8px;
-  background: #222;
-  color: white;
-}
+// Auto-expand textarea logic
+const maxBaseLength = 100;
+const maxLimit = 500;
+const step = 50;
 
-button {
-  padding: 10px;
-  background-color: #ff6b6b;
-  border: none;
-  border-radius: 8px;
-  font-size: 1rem;
-  color: white;
-  cursor: pointer;
-  transition: 0.3s ease;
-}
+messageInput.addEventListener("input", () => {
+  const length = messageInput.value.length;
+  const newLimit = Math.min(maxBaseLength + Math.floor(length / step) * step, maxLimit);
+  if (length >= newLimit) {
+    messageInput.value = messageInput.value.slice(0, newLimit);
+  }
+  messageInput.setAttribute("maxlength", newLimit);
+});
 
-button:hover {
-  background-color: #ff8787;
-}
-
-.post {
-  background: #1c1c1c;
-  padding: 15px;
-  border-radius: 10px;
-  margin-top: 20px;
-  position: relative;
-}
-
-.post p {
-  margin: 8px 0;
-  font-size: 1rem;
-}
-
-.reactions {
-  margin-top: 10px;
-  display: flex;
-  gap: 15px;
-}
-
-.reactions span {
-  cursor: pointer;
-  user-select: none;
-  font-size: 1.2rem;
-}
-
-.plus-btn {
-  background: #ff6b6b;
-  color: white;
-  font-size: 1.8rem;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  cursor: pointer;
-  margin: auto;
-  transition: 0.3s;
-}
-
-.plus-btn:hover {
-  background: #ff8787;
-}
-
-/* Vertical Emoji Filter Bar */
-#filterBar {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  position: fixed;
-  top: 100px;
-  left: 15px;
-  background: #222;
-  padding: 15px;
-  border-radius: 15px;
-  z-index: 999;
-  font-size: 1.6rem;
-  box-shadow: 0 0 10px rgba(255, 255, 255, 0.05);
-}
-
-#filterBar .filter-title {
-  font-size: 0.9rem;
-  color: #aaa;
-  margin-bottom: 10px;
-  text-align: center;
-}
-
-#filterBar span {
-  cursor: pointer;
-  transition: 0.2s;
-}
-
-#filterBar span:hover {
-  transform: scale(1.3);
-}
-
-/* Your Posts Sidebar */
-#yourPostsBar {
-  position: fixed;
-  bottom: 20px;
-  left: 15px;
-  background: #222;
-  padding: 15px;
-  border-radius: 12px;
-  width: 180px;
-  max-height: 300px;
-  overflow-y: auto;
-  z-index: 900;
-  box-shadow: 0 0 12px rgba(0,0,0,0.5);
-}
-
-.your-title {
-  font-size: 0.9rem;
-  color: #aaa;
-  margin-bottom: 10px;
-  text-align: center;
-  font-weight: bold;
-}
-
-#yourPostsList {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.your-post {
-  background: #111;
-  padding: 8px;
-  border-radius: 8px;
-  font-size: 0.85rem;
-  line-height: 1.2;
-}
-
-.your-post small {
-  display: block;
-  color: #999;
-  font-size: 0.7rem;
-  margin-top: 5px;
-}
+window.onload = loadPosts;
