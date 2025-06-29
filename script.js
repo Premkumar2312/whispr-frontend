@@ -1,8 +1,13 @@
 const postForm = document.getElementById("postForm");
 const messageInput = document.getElementById("message");
 const postsContainer = document.getElementById("postsContainer");
+const formToggle = document.getElementById("formToggle");
 
 let posts = [];
+
+formToggle.addEventListener("click", () => {
+  postForm.style.display = postForm.style.display === "none" ? "flex" : "none";
+});
 
 postForm.addEventListener("submit", (e) => {
   e.preventDefault();
@@ -15,7 +20,7 @@ postForm.addEventListener("submit", (e) => {
     reactions: { fire: 0, skull: 0, bulb: 0 },
   };
 
-  posts.unshift(newPost); // Add new post to the top
+  posts.unshift(newPost);
   messageInput.value = "";
   renderPosts();
 });
@@ -37,10 +42,18 @@ function renderPosts() {
     ["fire", "skull", "bulb"].forEach((type) => {
       const span = document.createElement("span");
       span.innerHTML = getEmoji(type) + " " + post.reactions[type];
+
       span.addEventListener("click", () => {
+        const votedKey = `voted_${post.id}_${type}`;
+        if (localStorage.getItem(votedKey)) {
+          alert("You already reacted with this emoji!");
+          return;
+        }
         post.reactions[type]++;
+        localStorage.setItem(votedKey, true);
         renderPosts();
       });
+
       reactionDiv.appendChild(span);
     });
 
@@ -56,3 +69,19 @@ function getEmoji(type) {
     bulb: "💡",
   }[type];
 }
+
+// === Auto-expand max length of textarea ===
+const maxBaseLength = 100;
+const maxLimit = 500;
+const step = 50;
+
+messageInput.addEventListener("input", () => {
+  const length = messageInput.value.length;
+  const newLimit = Math.min(maxBaseLength + Math.floor(length / step) * step, maxLimit);
+
+  if (length >= newLimit) {
+    messageInput.value = messageInput.value.slice(0, newLimit);
+  }
+
+  messageInput.setAttribute("maxlength", newLimit);
+});
