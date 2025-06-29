@@ -1,43 +1,67 @@
-const API_URL = "https://your-backend-url.com"; // Replace with your backend
+const API_URL = "https://your-koyeb-url.com"; // change to your actual backend URL
 
 const postForm = document.getElementById("postForm");
 const messageInput = document.getElementById("message");
 const postsContainer = document.getElementById("postsContainer");
-const formToggle = document.getElementById("formToggle");
+
 const yourPostsList = document.getElementById("yourPostsList");
+const yourPostsBar = document.getElementById("yourPostsBar");
 
 let allPosts = [];
 let yourPostIds = JSON.parse(localStorage.getItem("yourPostIds")) || [];
 
-formToggle.addEventListener("click", () => {
-  postForm.style.display = postForm.style.display === "none" ? "flex" : "none";
-});
+// ==== Toggle buttons ====
+
+function toggleYourPosts() {
+  yourPostsBar.style.display = yourPostsBar.style.display === "none" ? "block" : "none";
+}
+
+function toggleEmojiFilter() {
+  const panel = document.getElementById("emojiFilter");
+  panel.style.display = panel.style.display === "none" ? "flex" : "none";
+}
+
+// ==== Submit new post ====
 
 postForm.addEventListener("submit", async (e) => {
   e.preventDefault();
   const text = messageInput.value.trim();
   if (!text) return;
 
-  const res = await fetch(`${API_URL}/posts`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ text }),
-  });
+  try {
+    const res = await fetch(`${API_URL}/posts`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text }),
+    });
 
-  const data = await res.json();
-  yourPostIds.unshift(data._id);
-  localStorage.setItem("yourPostIds", JSON.stringify(yourPostIds));
+    const newPost = await res.json();
+    yourPostIds.unshift(newPost._id);
+    localStorage.setItem("yourPostIds", JSON.stringify(yourPostIds));
 
-  messageInput.value = "";
-  await loadPosts();
+    messageInput.value = "";
+    await loadPosts();
+  } catch (err) {
+    alert("Failed to post. Check your connection or backend.");
+  }
 });
 
+// ==== Load all posts from backend ====
+
 async function loadPosts() {
-  const res = await fetch(`${API_URL}/posts`);
-  allPosts = await res.json();
-  renderPosts(allPosts);
-  renderYourPosts();
+  try {
+    const res = await fetch(`${API_URL}/posts`);
+    allPosts = await res.json();
+
+    shuffleArray(allPosts); // For randomness
+    renderPosts(allPosts);
+    renderYourPosts();
+  } catch (err) {
+    alert("Couldn't fetch posts.");
+  }
 }
+
+// ==== Display all posts ====
 
 function renderPosts(posts) {
   postsContainer.innerHTML = "";
@@ -63,14 +87,18 @@ function renderPosts(posts) {
           return;
         }
 
-        await fetch(`${API_URL}/posts/${post._id}/react`, {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ type }),
-        });
+        try {
+          await fetch(`${API_URL}/posts/${post._id}/react`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ type }),
+          });
 
-        localStorage.setItem(votedKey, true);
-        await loadPosts();
+          localStorage.setItem(votedKey, "true");
+          await loadPosts();
+        } catch {
+          alert("Error reacting to post.");
+        }
       });
 
       reactionDiv.appendChild(span);
@@ -82,18 +110,20 @@ function renderPosts(posts) {
   });
 }
 
+// ==== Display your posts ====
+
 function renderYourPosts() {
   yourPostsList.innerHTML = "";
 
-  const yourPosts = allPosts.filter(post => yourPostIds.includes(post._id));
-  yourPosts.forEach((post) => {
+  const userPosts = allPosts.filter(post => yourPostIds.includes(post._id));
+  userPosts.forEach(post => {
     const div = document.createElement("div");
     div.className = "your-post";
     div.textContent = post.text;
 
     const emojiCounts = Object.entries(post.reactions)
-      .map(([key, value]) => `${getEmoji(key)} ${value}`)
-      .join("  ");
+      .map(([type, count]) => `${getEmoji(type)} ${count}`)
+      .join(" ");
 
     const meta = document.createElement("small");
     meta.textContent = emojiCounts;
@@ -103,20 +133,34 @@ function renderYourPosts() {
   });
 }
 
+// ==== Filter top posts by emoji ====
+
 function filterBy(type) {
   const sorted = [...allPosts].sort((a, b) => b.reactions[type] - a.reactions[type]);
   renderPosts(sorted);
 }
 
+// ==== Emoji utility ====
+
 function getEmoji(type) {
   return {
     fire: "🔥",
     skull: "💀",
-    bulb: "💡",
+    bulb: "💡"
   }[type];
 }
 
-// Auto-expand textarea logic
+// ==== Random shuffle ====
+
+function shuffleArray(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+}
+
+// ==== Auto-limit textarea ====
+
 const maxBaseLength = 100;
 const maxLimit = 500;
 const step = 50;
@@ -124,20 +168,14 @@ const step = 50;
 messageInput.addEventListener("input", () => {
   const length = messageInput.value.length;
   const newLimit = Math.min(maxBaseLength + Math.floor(length / step) * step, maxLimit);
+
   if (length >= newLimit) {
     messageInput.value = messageInput.value.slice(0, newLimit);
   }
+
   messageInput.setAttribute("maxlength", newLimit);
 });
 
+// ==== Initialize ====
+
 window.onload = loadPosts;
-
-function toggleYourPosts() {
-  const panel = document.getElementById("yourPostsBar");
-  panel.style.display = panel.style.display === "none" ? "block" : "none";
-}
-
-function toggleEmojiFilter() {
-  const panel = document.getElementById("emojiFilter");
-  panel.style.display = panel.style.display === "none" ? "flex" : "none";
-}
