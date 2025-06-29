@@ -131,3 +131,13 @@ messageInput.addEventListener("input", () => {
 });
 
 window.onload = loadPosts;
+
+function toggleYourPosts() {
+  const panel = document.getElementById("yourPostsBar");
+  panel.style.display = panel.style.display === "none" ? "block" : "none";
+}
+
+function toggleEmojiFilter() {
+  const panel = document.getElementById("emojiFilter");
+  panel.style.display = panel.style.display === "none" ? "flex" : "none";
+}
