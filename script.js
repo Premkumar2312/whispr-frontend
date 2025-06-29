@@ -1,40 +1,18 @@
-const API_URL = "https://your-backend-url.com"; // change to your actual backend
+const API_URL = "https://your-backend-url.com"; // Replace with your backend
 
 const postForm = document.getElementById("postForm");
 const messageInput = document.getElementById("message");
 const postsContainer = document.getElementById("postsContainer");
 const formToggle = document.getElementById("formToggle");
-const usernameOverlay = document.getElementById("usernameOverlay");
-const usernameInput = document.getElementById("usernameInput");
+const yourPostsList = document.getElementById("yourPostsList");
 
-let username = localStorage.getItem("whispr_username");
 let allPosts = [];
+let yourPostIds = JSON.parse(localStorage.getItem("yourPostIds")) || [];
 
-// Show/hide form
 formToggle.addEventListener("click", () => {
   postForm.style.display = postForm.style.display === "none" ? "flex" : "none";
 });
 
-// On load
-window.onload = () => {
-  if (!username) {
-    usernameOverlay.style.display = "flex";
-  } else {
-    loadPosts();
-  }
-};
-
-// Save username
-function saveUsername() {
-  const input = usernameInput.value.trim();
-  if (!input) return alert("Enter a username.");
-  username = input;
-  localStorage.setItem("whispr_username", username);
-  usernameOverlay.style.display = "none";
-  loadPosts();
-}
-
-// Submit post
 postForm.addEventListener("submit", async (e) => {
   e.preventDefault();
   const text = messageInput.value.trim();
@@ -43,21 +21,24 @@ postForm.addEventListener("submit", async (e) => {
   const res = await fetch(`${API_URL}/posts`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ text, username }),
+    body: JSON.stringify({ text }),
   });
+
+  const data = await res.json();
+  yourPostIds.unshift(data._id);
+  localStorage.setItem("yourPostIds", JSON.stringify(yourPostIds));
 
   messageInput.value = "";
   await loadPosts();
 });
 
-// Load all posts
 async function loadPosts() {
   const res = await fetch(`${API_URL}/posts`);
   allPosts = await res.json();
   renderPosts(allPosts);
+  renderYourPosts();
 }
 
-// Render given posts
 function renderPosts(posts) {
   postsContainer.innerHTML = "";
 
@@ -67,10 +48,6 @@ function renderPosts(posts) {
 
     const text = document.createElement("p");
     text.textContent = post.text;
-
-    const meta = document.createElement("small");
-    const isYours = post.username === username;
-    meta.innerHTML = `🧑 ${post.username}${isYours ? " (you)" : ""}`;
 
     const reactionDiv = document.createElement("div");
     reactionDiv.className = "reactions";
@@ -99,14 +76,33 @@ function renderPosts(posts) {
       reactionDiv.appendChild(span);
     });
 
-    postDiv.appendChild(meta);
     postDiv.appendChild(text);
     postDiv.appendChild(reactionDiv);
     postsContainer.appendChild(postDiv);
   });
 }
 
-// Emoji filter
+function renderYourPosts() {
+  yourPostsList.innerHTML = "";
+
+  const yourPosts = allPosts.filter(post => yourPostIds.includes(post._id));
+  yourPosts.forEach((post) => {
+    const div = document.createElement("div");
+    div.className = "your-post";
+    div.textContent = post.text;
+
+    const emojiCounts = Object.entries(post.reactions)
+      .map(([key, value]) => `${getEmoji(key)} ${value}`)
+      .join("  ");
+
+    const meta = document.createElement("small");
+    meta.textContent = emojiCounts;
+    div.appendChild(meta);
+
+    yourPostsList.appendChild(div);
+  });
+}
+
 function filterBy(type) {
   const sorted = [...allPosts].sort((a, b) => b.reactions[type] - a.reactions[type]);
   renderPosts(sorted);
@@ -120,7 +116,7 @@ function getEmoji(type) {
   }[type];
 }
 
-// === Auto-expand limit on textarea ===
+// Auto-expand textarea logic
 const maxBaseLength = 100;
 const maxLimit = 500;
 const step = 50;
@@ -128,10 +124,10 @@ const step = 50;
 messageInput.addEventListener("input", () => {
   const length = messageInput.value.length;
   const newLimit = Math.min(maxBaseLength + Math.floor(length / step) * step, maxLimit);
-
   if (length >= newLimit) {
     messageInput.value = messageInput.value.slice(0, newLimit);
   }
-
   messageInput.setAttribute("maxlength", newLimit);
 });
+
+window.onload = loadPosts;
