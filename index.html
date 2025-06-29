@@ -11,8 +11,10 @@
     <h1>Whispr</h1>
     <p class="tagline">Speak freely. Stay anonymous.</p>
 
-    <form id="postForm">
-      <textarea id="message" maxlength="200" placeholder="What's on your mind?" required></textarea>
+    <div id="formToggle" class="plus-btn">➕</div>
+
+    <form id="postForm" style="display: none;">
+      <textarea id="message" placeholder="Type your whisper..." required></textarea>
       <button type="submit">Post</button>
     </form>
 
