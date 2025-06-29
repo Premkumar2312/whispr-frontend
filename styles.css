@@ -10,13 +10,11 @@ body {
   max-width: 600px;
   margin: auto;
   padding: 20px;
-  padding-bottom: 100px; /* space for floating button */
 }
 
 h1 {
   text-align: center;
   color: #ff6b6b;
-  font-size: 2.2rem;
 }
 
 .tagline {
@@ -30,7 +28,7 @@ form {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  margin-top: 10px;
+  margin-top: 15px;
 }
 
 textarea {
@@ -41,7 +39,6 @@ textarea {
   border-radius: 8px;
   background: #222;
   color: white;
-  min-height: 80px;
 }
 
 button {
@@ -68,8 +65,13 @@ button:hover {
 }
 
 .post p {
-  margin: 0;
+  margin: 8px 0;
   font-size: 1rem;
+}
+
+.post small {
+  color: #999;
+  font-size: 0.8rem;
 }
 
 .reactions {
@@ -84,53 +86,81 @@ button:hover {
   font-size: 1.2rem;
 }
 
-/* Plus Button (Floating Action Button) */
 .plus-btn {
-  position: fixed;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 60px;
-  height: 60px;
-  background-color: #ff6b6b;
+  background: #ff6b6b;
   color: white;
+  font-size: 1.8rem;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
-  font-size: 2rem;
   display: flex;
-  align-items: center;
   justify-content: center;
+  align-items: center;
   cursor: pointer;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  z-index: 100;
-  transition: background-color 0.3s ease, transform 0.2s ease;
+  margin: auto;
+  transition: 0.3s;
 }
 
 .plus-btn:hover {
-  background-color: #ff8787;
-  transform: translateX(-50%) scale(1.1);
+  background: #ff8787;
 }
 
-/* Responsive adjustments */
-@media (max-width: 600px) {
-  h1 {
-    font-size: 1.8rem;
-  }
+.overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.9);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
 
-  .plus-btn {
-    width: 50px;
-    height: 50px;
-    font-size: 1.8rem;
-  }
+.username-box {
+  background: #222;
+  padding: 25px;
+  border-radius: 12px;
+  text-align: center;
+  box-shadow: 0 0 15px rgba(255, 107, 107, 0.5);
+}
 
-  textarea {
-    font-size: 0.95rem;
-  }
+.username-box input {
+  padding: 10px;
+  font-size: 1rem;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  width: 100%;
+  border: none;
+  background: #333;
+  color: white;
+}
 
-  button {
-    font-size: 0.95rem;
-  }
+.username-box button {
+  padding: 10px 20px;
+  background-color: #ff6b6b;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: white;
+  cursor: pointer;
+}
 
-  .reactions span {
-    font-size: 1rem;
-  }
+#filterBar {
+  display: flex;
+  gap: 15px;
+  position: fixed;
+  top: 15px;
+  left: 15px;
+  z-index: 999;
+  background: #222;
+  padding: 8px 15px;
+  border-radius: 20px;
+  font-size: 1.4rem;
+}
+#filterBar span {
+  cursor: pointer;
+  transition: 0.2s;
+}
+#filterBar span:hover {
+  transform: scale(1.2);
 }
