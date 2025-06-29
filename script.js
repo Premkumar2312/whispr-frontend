@@ -1,4 +1,4 @@
-const API_URL = "https://your-koyeb-url.com"; // change to your actual backend URL
+const API_URL = "scared-merralee-presonal-projects-674b2e52.koyeb.app/"; // change to your actual backend URL
 
 const postForm = document.getElementById("postForm");
 const messageInput = document.getElementById("message");
