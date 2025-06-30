@@ -1,4 +1,4 @@
-const API_URL = "https://your-koyeb-url.com"; // change to your actual backend URL
+const API_URL = "https://a8b8-117-234-234-130.ngrok-free.app"; // change to your actual backend URL
 
 const postForm = document.getElementById("postForm");
 const messageInput = document.getElementById("message");
@@ -29,7 +29,7 @@ const text = messageInput.value.trim();
 if (!text) return;
 
 try {
-const res = await fetch(${API_URL}/posts, {
+const res = await fetch(`${API_URL}/posts`, {
 method: "POST",
 headers: { "Content-Type": "application/json" },
 body: JSON.stringify({ text }),
@@ -51,7 +51,7 @@ alert("Failed to post. Check your connection or backend.");
 
 async function loadPosts() {
 try {
-const res = await fetch(${API_URL}/posts);
+const res = await fetch(`${API_URL}/posts`);
 allPosts = await res.json();
 
 shuffleArray(allPosts); // For randomness  
@@ -80,7 +80,7 @@ reactionDiv.className = "reactions";
 
 ["fire", "skull", "bulb"].forEach((type) => {  
   const span = document.createElement("span");  
-  span.innerHTML = `${getEmoji(type)} ${post.reactions[type]}`;  
+  span.innerHTML =` ${getEmoji(type)} ${post.reactions[type]}`;  
 
   span.addEventListener("click", async () => {  
     const votedKey = `voted_${post._id}_${type}`;  
