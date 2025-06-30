@@ -50,7 +50,7 @@ postForm.addEventListener("submit", async (e) => {
 
 async function loadPosts() {
   try {
-    const res = await fetch(`${API_URL}/Post`);
+    const res = await fetch(`${API_URL}models/Post`);
     allPosts = await res.json();
 
     shuffleArray(allPosts); // For randomness
