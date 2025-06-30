@@ -1,5 +1,4 @@
-
-const API_URL = "https://a8b8-117-234-234-130.ngrok-free.app"; // change to your actual backend URL
+const API_URL = "https://your-koyeb-url.com"; // change to your actual backend URL
 
 const postForm = document.getElementById("postForm");
 const messageInput = document.getElementById("message");
@@ -30,7 +29,7 @@ const text = messageInput.value.trim();
 if (!text) return;
 
 try {
-const res = await fetch(${API_URL}models/Post, {
+const res = await fetch(${API_URL}/posts, {
 method: "POST",
 headers: { "Content-Type": "application/json" },
 body: JSON.stringify({ text }),
@@ -52,7 +51,7 @@ alert("Failed to post. Check your connection or backend.");
 
 async function loadPosts() {
 try {
-const res = await fetch(${API_URL}models/Post);
+const res = await fetch(${API_URL}/posts);
 allPosts = await res.json();
 
 shuffleArray(allPosts); // For randomness  
@@ -167,14 +166,14 @@ const j = Math.floor(Math.random() * (i + 1));
 // ==== Auto-limit textarea ====
 
 messageInput.addEventListener("input", () => {
-const length = messageInput.value.length;
-const newLimit = Math.min(maxBaseLength + Math.floor(length / step) * step, maxLimit);
+  const length = messageInput.value.length;
+  const newLimit = Math.min(maxBaseLength + Math.floor(length / step) * step, maxLimit);
 
-if (length >= newLimit) {
-messageInput.value = messageInput.value.slice(0, newLimit);
-}
+  if (length >= newLimit) {
+    messageInput.value = messageInput.value.slice(0, newLimit);
+  }
 
-messageInput.setAttribute("maxlength", newLimit);
+  messageInput.setAttribute("maxlength", newLimit);
 });
 
 // ==== Show/Hide post form ====
@@ -182,13 +181,10 @@ messageInput.setAttribute("maxlength", newLimit);
 const formToggle = document.getElementById("formToggle");
 
 formToggle.addEventListener("click", () => {
-const isVisible = postForm.style.display === "flex";
-postForm.style.display = isVisible ? "none" : "flex";
+  const isVisible = postForm.style.display === "flex";
+  postForm.style.display = isVisible ? "none" : "flex";
 });
 
 // ==== Load posts on start ====
 
 window.onload = loadPosts;
-
-
-
