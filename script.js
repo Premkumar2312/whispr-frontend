@@ -29,7 +29,7 @@ postForm.addEventListener("submit", async (e) => {
   if (!text) return;
 
   try {
-    const res = await fetch(`${API_URL}/posts`, {
+    const res = await fetch(`${API_URL}/Post`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ text }),
