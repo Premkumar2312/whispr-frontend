@@ -29,7 +29,7 @@ postForm.addEventListener("submit", async (e) => {
   if (!text) return;
 
   try {
-    const res = await fetch(`${API_URL}/posts`, {
+    const res = await fetch(`${API_URL}/post`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ text }),
@@ -50,7 +50,7 @@ postForm.addEventListener("submit", async (e) => {
 
 async function loadPosts() {
   try {
-    const res = await fetch(`${API_URL}/posts`);
+    const res = await fetch(`${API_URL}/post`);
     allPosts = await res.json();
 
     shuffleArray(allPosts); // For randomness
