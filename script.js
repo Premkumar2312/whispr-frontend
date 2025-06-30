@@ -1,4 +1,4 @@
-const API_URL = "https://a8b8-117-234-234-130.ngrok-free.app"; // change to your actual backend URL
+const API_URL = "https://4b86-117-225-65-77.ngrok-free.app "; // change to your actual backend URL
 
 const postForm = document.getElementById("postForm");
 const messageInput = document.getElementById("message");
