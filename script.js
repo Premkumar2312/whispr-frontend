@@ -1,4 +1,4 @@
-const API_URL = "https://fundamental-janine-presonal-projects-bc58dd75.koyeb.app/"; // change to your actual backend URL
+const API_URL = "https://fundamental-janine-presonal-projects-bc58dd75.koyeb.app"; // change to your actual backend URL
 
 const postForm = document.getElementById("postForm");
 const messageInput = document.getElementById("message");
