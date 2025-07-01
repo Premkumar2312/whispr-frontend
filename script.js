@@ -6,15 +6,17 @@ const postsContainer = document.getElementById("postsContainer");
 const homePage = document.getElementById("homePage");
 const profilePage = document.getElementById("profilePage");
 const userProfilePosts = document.getElementById("userProfilePosts");
-const backToHomeBtn = document.getElementById("backToHomeBtn");
+const yourPostsButton = document.getElementById("yourPostsButton");
 
 let allPosts = [];
 let yourPostIds = JSON.parse(localStorage.getItem("yourPostIds")) || [];
 
+// Toggle Post Form
 document.getElementById("formToggle").addEventListener("click", () => {
   postForm.style.display = postForm.style.display === "flex" ? "none" : "flex";
 });
 
+// Submit New Post
 postForm.addEventListener("submit", async (e) => {
   e.preventDefault();
   const text = messageInput.value.trim();
@@ -36,6 +38,7 @@ postForm.addEventListener("submit", async (e) => {
   }
 });
 
+// Load All Posts
 async function loadPosts() {
   try {
     const res = await fetch(`${API_URL}/posts`);
@@ -47,6 +50,7 @@ async function loadPosts() {
   }
 }
 
+// Render Posts (Homepage)
 function renderPosts(posts) {
   postsContainer.innerHTML = "";
   posts.forEach((post) => {
@@ -62,6 +66,7 @@ function renderPosts(posts) {
   });
 }
 
+// Voting
 async function vote(postId, type) {
   const key = `voted_${postId}`;
   if (localStorage.getItem(key)) {
@@ -82,17 +87,7 @@ async function vote(postId, type) {
   }
 }
 
-function openProfile() {
-  homePage.style.display = "none";
-  profilePage.style.display = "block";
-  renderProfilePosts();
-}
-
-backToHomeBtn.addEventListener("click", () => {
-  profilePage.style.display = "none";
-  homePage.style.display = "block";
-});
-
+// Render Profile Page Posts
 function renderProfilePosts() {
   userProfilePosts.innerHTML = "";
   const userPosts = allPosts.filter(post => yourPostIds.includes(post._id));
@@ -115,6 +110,36 @@ function renderProfilePosts() {
   });
 }
 
+// Profile Toggle with Animation
+yourPostsButton.addEventListener("click", () => {
+  const isProfileOpen = profilePage.style.display === "block";
+
+  if (isProfileOpen) {
+    profilePage.classList.remove("fade-in");
+    profilePage.classList.add("fade-out");
+
+    setTimeout(() => {
+      profilePage.style.display = "none";
+      homePage.style.display = "block";
+      homePage.classList.add("fade-in");
+      setTimeout(() => homePage.classList.remove("fade-in"), 300);
+    }, 300);
+  } else {
+    homePage.classList.add("fade-out");
+
+    setTimeout(() => {
+      homePage.style.display = "none";
+      homePage.classList.remove("fade-out");
+
+      profilePage.style.display = "block";
+      profilePage.classList.add("fade-in");
+      renderProfilePosts();
+      setTimeout(() => profilePage.classList.remove("fade-in"), 300);
+    }, 300);
+  }
+});
+
+// Trending Tab
 function showTrending() {
   const now = new Date();
   const oneDayAgo = new Date(now - 24 * 60 * 60 * 1000);
@@ -124,6 +149,7 @@ function showTrending() {
   renderPosts(trending);
 }
 
+// Shuffle
 function shuffleArray(array) {
   for (let i = array.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -131,6 +157,7 @@ function shuffleArray(array) {
   }
 }
 
+// Theme Toggle
 function toggleTheme() {
   const body = document.body;
   const isLight = body.classList.toggle("light");
@@ -138,6 +165,7 @@ function toggleTheme() {
   document.getElementById("themeToggle").textContent = isLight ? "🌞" : "🌙";
 }
 
+// On Load
 window.onload = () => {
   loadPosts();
   const savedTheme = localStorage.getItem("theme");
