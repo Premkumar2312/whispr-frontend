@@ -184,6 +184,47 @@ function toggleTheme() {
   document.getElementById("themeToggle").textContent = isLight ? "🌞" : "🌙";
 }
 
+//search 
+
+const searchToggle = document.getElementById("searchToggle");
+const searchBox = document.getElementById("searchBox");
+const searchInput = document.getElementById("searchInput");
+
+// Toggle search box visibility
+function toggleSearch() {
+  const isVisible = searchBox.style.display === "block";
+  searchBox.style.display = isVisible ? "none" : "block";
+  if (!isVisible) {
+    searchInput.focus();
+  } else {
+    searchInput.value = "";
+    renderPosts(allPosts);
+  }
+}
+
+// Live search filter
+searchInput.addEventListener("input", () => {
+  const query = searchInput.value.toLowerCase().trim();
+  if (!query) {
+    renderPosts(allPosts);
+    return;
+  }
+
+  const filtered = allPosts.filter(post =>
+    post.text.toLowerCase().includes(query)
+  );
+  renderPosts(filtered);
+});
+
+// Optional: Hide search on ESC
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") {
+    searchBox.style.display = "none";
+    searchInput.value = "";
+    renderPosts(allPosts);
+  }
+});
+
 // On Load
 window.onload = () => {
   loadPosts();
