@@ -8,36 +8,36 @@
 </head>
 <body>
 
-  <!-- Floating Top By Emoji Filter -->
-  <div id="topByButton" onclick="toggleEmojiFilter()">📊</div>
-  <div id="emojiFilter">
-    <span onclick="filterBy('fire')">🔥</span>
-    <span onclick="filterBy('skull')">💀</span>
-    <span onclick="filterBy('bulb')">💡</span>
-  </div>
+  <!-- Theme Toggle Switch (Top Left) -->
+  <div id="themeToggle" onclick="toggleTheme()">🌙</div>
 
-  <!-- Floating Your Posts Button -->
-  <div id="yourPostsButton" onclick="toggleYourPosts()">👤</div>
-  <div id="yourPostsBar" style="display: none;">
-    <div class="your-title">Your Posts</div>
-    <div id="yourPostsList"></div>
-  </div>
+  <!-- Trending Tab -->
+  <div id="trendingTab" onclick="showTrending()">🔥</div>
 
-  <!-- Add Post Button (bottom center) -->
+  <!-- Profile Button -->
+  <div id="yourPostsButton" onclick="openProfile()">👤</div>
+
+  <!-- Add Post -->
   <div id="formToggle" class="add-post-btn">+</div>
 
   <!-- Main Container -->
-  <div class="container">
+  <div class="container" id="homePage">
     <h1>Whispr</h1>
     <p class="tagline">Speak freely. Stay anonymous.</p>
 
-    <!-- Post Form -->
     <form id="postForm" style="display: none;">
       <textarea id="message" placeholder="Type your whisper..." required></textarea>
       <button type="submit">Post</button>
     </form>
 
     <div id="postsContainer"></div>
+  </div>
+
+  <!-- Profile Page -->
+  <div id="profilePage" style="display: none;">
+    <button id="backToHomeBtn">← Back</button>
+    <h2>Your Posts</h2>
+    <div id="userProfilePosts" class="posts-list"></div>
   </div>
 
   <script src="script.js"></script>
