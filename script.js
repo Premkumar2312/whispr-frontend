@@ -1,190 +1,150 @@
-const API_URL = "https://fundamental-janine-presonal-projects-bc58dd75.koyeb.app"; // change to your actual backend URL
+const API_URL = "https://original-tiena-presonal-projects-c5de53a2.koyeb.app";
 
 const postForm = document.getElementById("postForm");
 const messageInput = document.getElementById("message");
 const postsContainer = document.getElementById("postsContainer");
-
-const yourPostsList = document.getElementById("yourPostsList");
-const yourPostsBar = document.getElementById("yourPostsBar");
+const homePage = document.getElementById("homePage");
+const profilePage = document.getElementById("profilePage");
+const userProfilePosts = document.getElementById("userProfilePosts");
+const backToHomeBtn = document.getElementById("backToHomeBtn");
 
 let allPosts = [];
 let yourPostIds = JSON.parse(localStorage.getItem("yourPostIds")) || [];
 
-// ==== Toggle buttons ====
-
-function toggleYourPosts() {
-yourPostsBar.style.display = yourPostsBar.style.display === "none" ? "block" : "none";
-}
-
-function toggleEmojiFilter() {
-const panel = document.getElementById("emojiFilter");
-panel.style.display = panel.style.display === "none" ? "flex" : "none";
-}
-
-// ==== Submit new post ====
+document.getElementById("formToggle").addEventListener("click", () => {
+  postForm.style.display = postForm.style.display === "flex" ? "none" : "flex";
+});
 
 postForm.addEventListener("submit", async (e) => {
-e.preventDefault();
-const text = messageInput.value.trim();
-if (!text) return;
+  e.preventDefault();
+  const text = messageInput.value.trim();
+  if (!text) return;
 
-try {
-const res = await fetch(`${API_URL}/posts`, {
-method: "POST",
-headers: { "Content-Type": "application/json" },
-body: JSON.stringify({ text }),
+  try {
+    const res = await fetch(`${API_URL}/posts`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text }),
+    });
+    const newPost = await res.json();
+    yourPostIds.unshift(newPost._id);
+    localStorage.setItem("yourPostIds", JSON.stringify(yourPostIds));
+    messageInput.value = "";
+    await loadPosts();
+  } catch (err) {
+    alert("Failed to post.");
+  }
 });
-
-const newPost = await res.json();  
-yourPostIds.unshift(newPost._id);  
-localStorage.setItem("yourPostIds", JSON.stringify(yourPostIds));  
-
-messageInput.value = "";  
-await loadPosts();
-
-} catch (err) {
-alert("Failed to post. Check your connection or backend.");
-}
-});
-
-// ==== Load all posts from backend ====
 
 async function loadPosts() {
-try {
-const res = await fetch(`${API_URL}/posts`);
-allPosts = await res.json();
-
-shuffleArray(allPosts); // For randomness  
-renderPosts(allPosts);  
-renderYourPosts();
-
-} catch (err) {
-alert("Couldn't fetch posts.");
+  try {
+    const res = await fetch(`${API_URL}/posts`);
+    allPosts = await res.json();
+    shuffleArray(allPosts);
+    renderPosts(allPosts);
+  } catch {
+    alert("Could not fetch posts.");
+  }
 }
-}
-
-// ==== Display all posts ====
 
 function renderPosts(posts) {
-postsContainer.innerHTML = "";
-
-posts.forEach((post) => {
-const postDiv = document.createElement("div");
-postDiv.className = "post";
-
-const text = document.createElement("p");  
-text.textContent = post.text;  
-
-const reactionDiv = document.createElement("div");  
-reactionDiv.className = "reactions";  
-
-["fire", "skull", "bulb"].forEach((type) => {  
-  const span = document.createElement("span");  
-  span.innerHTML =` ${getEmoji(type)} ${post.reactions[type]}`;  
-
-  span.addEventListener("click", async () => {  
-    const votedKey = `voted_${post._id}_${type}`;  
-    if (localStorage.getItem(votedKey)) {  
-      alert("You already reacted with this emoji!");  
-      return;  
-    }  
-
-    try {  
-      await fetch(`${API_URL}/posts/${post._id}/react`, {  
-        method: "PATCH",  
-        headers: { "Content-Type": "application/json" },  
-        body: JSON.stringify({ type }),  
-      });  
-
-      localStorage.setItem(votedKey, "true");  
-      await loadPosts();  
-    } catch {  
-      alert("Error reacting to post.");  
-    }  
-  });  
-
-  reactionDiv.appendChild(span);  
-});  
-
-postDiv.appendChild(text);  
-postDiv.appendChild(reactionDiv);  
-postsContainer.appendChild(postDiv);
-
-});
+  postsContainer.innerHTML = "";
+  posts.forEach((post) => {
+    const postDiv = document.createElement("div");
+    postDiv.className = "post";
+    postDiv.innerHTML = `
+      <p>${post.text}</p>
+      <div class="reactions">
+        <span onclick="vote('${post._id}', 'up')">👍 ${post.upvotes || 0}</span>
+        <span onclick="vote('${post._id}', 'down')">👎 ${post.downvotes || 0}</span>
+      </div>`;
+    postsContainer.appendChild(postDiv);
+  });
 }
 
-// ==== Display your posts ====
-
-function renderYourPosts() {
-yourPostsList.innerHTML = "";
-
-const userPosts = allPosts.filter(post => yourPostIds.includes(post._id));
-userPosts.forEach(post => {
-const div = document.createElement("div");
-div.className = "your-post";
-div.textContent = post.text;
-
-const emojiCounts = Object.entries(post.reactions)  
-  .map(([type, count]) => `${getEmoji(type)} ${count}`)  
-  .join(" ");  
-
-const meta = document.createElement("small");  
-meta.textContent = emojiCounts;  
-div.appendChild(meta);  
-
-yourPostsList.appendChild(div);
-
-});
-}
-
-// ==== Filter top posts by emoji ====
-
-function filterBy(type) {
-const sorted = [...allPosts].sort((a, b) => b.reactions[type] - a.reactions[type]);
-renderPosts(sorted);
-}
-
-// ==== Emoji utility ====
-
-function getEmoji(type) {
-return {
-fire: "🔥",
-skull: "💀",
-bulb: "💡"
-}[type];
-}
-
-// ==== Random shuffle ====
-
-function shuffleArray(array) {
-for (let i = array.length - 1; i > 0; i--) {
-const j = Math.floor(Math.random() * (i + 1));
-[array[i], array[j]] = [array[j], array[i]];
-}
-}
-
-// ==== Auto-limit textarea ====
-
-messageInput.addEventListener("input", () => {
-  const length = messageInput.value.length;
-  const newLimit = Math.min(maxBaseLength + Math.floor(length / step) * step, maxLimit);
-
-  if (length >= newLimit) {
-    messageInput.value = messageInput.value.slice(0, newLimit);
+async function vote(postId, type) {
+  const key = `voted_${postId}`;
+  if (localStorage.getItem(key)) {
+    alert("Already voted.");
+    return;
   }
 
-  messageInput.setAttribute("maxlength", newLimit);
+  try {
+    await fetch(`${API_URL}/posts/${postId}/vote`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ type }),
+    });
+    localStorage.setItem(key, "true");
+    await loadPosts();
+  } catch {
+    alert("Vote failed.");
+  }
+}
+
+function openProfile() {
+  homePage.style.display = "none";
+  profilePage.style.display = "block";
+  renderProfilePosts();
+}
+
+backToHomeBtn.addEventListener("click", () => {
+  profilePage.style.display = "none";
+  homePage.style.display = "block";
 });
 
-// ==== Show/Hide post form ====
+function renderProfilePosts() {
+  userProfilePosts.innerHTML = "";
+  const userPosts = allPosts.filter(post => yourPostIds.includes(post._id));
+  if (userPosts.length === 0) {
+    userProfilePosts.innerHTML = "<p>No posts yet.</p>";
+    return;
+  }
 
-const formToggle = document.getElementById("formToggle");
+  userPosts.forEach(post => {
+    const div = document.createElement("div");
+    div.className = "post";
+    div.innerHTML = `
+      <p>${post.text}</p>
+      <div class="reactions">
+        <span>👍 ${post.upvotes || 0}</span>
+        <span>👎 ${post.downvotes || 0}</span>
+      </div>
+    `;
+    userProfilePosts.appendChild(div);
+  });
+}
 
-formToggle.addEventListener("click", () => {
-  const isVisible = postForm.style.display === "flex";
-  postForm.style.display = isVisible ? "none" : "flex";
-});
+function showTrending() {
+  const now = new Date();
+  const oneDayAgo = new Date(now - 24 * 60 * 60 * 1000);
+  const trending = allPosts
+    .filter(p => new Date(p.createdAt) > oneDayAgo)
+    .sort((a, b) => (b.upvotes || 0) - (a.upvotes || 0));
+  renderPosts(trending);
+}
 
-// ==== Load posts on start ====
+function shuffleArray(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+}
 
-window.onload = loadPosts;
+function toggleTheme() {
+  const body = document.body;
+  const isLight = body.classList.toggle("light");
+  localStorage.setItem("theme", isLight ? "light" : "dark");
+  document.getElementById("themeToggle").textContent = isLight ? "🌞" : "🌙";
+}
+
+window.onload = () => {
+  loadPosts();
+  const savedTheme = localStorage.getItem("theme");
+  if (savedTheme === "light") {
+    document.body.classList.add("light");
+    document.getElementById("themeToggle").textContent = "🌞";
+  } else {
+    document.getElementById("themeToggle").textContent = "🌙";
+  }
+};
