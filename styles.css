@@ -1,3 +1,4 @@
+
 /* Base */
 body {
   font-family: 'Segoe UI', sans-serif;
@@ -209,4 +210,36 @@ button:hover {
 
 #emojiFilter span:hover {
   transform: scale(1.2);
+}
+
+#profilePage {
+  padding: 20px;
+}
+
+#profilePage h2 {
+  text-align: center;
+  color: #ff6b6b;
+}
+
+#backToHomeBtn {
+  background: #ff6b6b;
+  border: none;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  margin-bottom: 15px;
+}
+
+#userProfilePosts .post {
+  background: #1c1c1c;
+  padding: 15px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+}
+
+body.light #profilePage,
+body.light #userProfilePosts .post {
+  background: #fff;
+  color: #222;
 }
