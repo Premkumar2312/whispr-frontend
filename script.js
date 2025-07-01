@@ -111,22 +111,36 @@ function renderProfilePosts() {
 }
 
 // Profile Toggle with Animation
+let isProfileOpen = false;
+let isTransitioning = false;
+
 yourPostsButton.addEventListener("click", () => {
-  const isProfileOpen = profilePage.style.display === "block";
+  if (isTransitioning) return; // prevent spam clicks
+  isTransitioning = true;
 
   if (isProfileOpen) {
-    profilePage.classList.remove("fade-in");
-    profilePage.classList.add("fade-out");
+    profilePage.classList.remove("fade-in", "fade-out");
+    homePage.classList.remove("fade-in", "fade-out");
 
+    profilePage.classList.add("fade-out");
     setTimeout(() => {
       profilePage.style.display = "none";
+      profilePage.classList.remove("fade-out");
+
       homePage.style.display = "block";
       homePage.classList.add("fade-in");
-      setTimeout(() => homePage.classList.remove("fade-in"), 300);
+
+      setTimeout(() => {
+        homePage.classList.remove("fade-in");
+        isTransitioning = false;
+        isProfileOpen = false;
+      }, 300);
     }, 300);
   } else {
-    homePage.classList.add("fade-out");
+    homePage.classList.remove("fade-in", "fade-out");
+    profilePage.classList.remove("fade-in", "fade-out");
 
+    homePage.classList.add("fade-out");
     setTimeout(() => {
       homePage.style.display = "none";
       homePage.classList.remove("fade-out");
@@ -134,7 +148,12 @@ yourPostsButton.addEventListener("click", () => {
       profilePage.style.display = "block";
       profilePage.classList.add("fade-in");
       renderProfilePosts();
-      setTimeout(() => profilePage.classList.remove("fade-in"), 300);
+
+      setTimeout(() => {
+        profilePage.classList.remove("fade-in");
+        isTransitioning = false;
+        isProfileOpen = true;
+      }, 300);
     }, 300);
   }
 });
